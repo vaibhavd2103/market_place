@@ -18,6 +18,7 @@ type User = {
 type AuthContextType = {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, role: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -41,6 +42,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // cookies().set("token", token, { expires: 7 });
       // Use js-cookie to set the token cookie
       Cookies.set("token", token, { expires: 1 });
+      Cookies.set("user", JSON.stringify(user), { expires: 7 });
+      setUser(user);
+      router.push(`/${user.role}/dashboard`);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Failed to login", error);
+      alert(JSON.stringify(axiosError.message));
+    }
+  };
+
+  const register = async (username: string, password: string, role: string) => {
+    try {
+      const res = await instance.post(API.REGISTER, {
+        username,
+        password,
+        role,
+      });
+      console.log(res.data);
+      const { token, user } = res.data;
+      window.localStorage.setItem("token", token);
+      window.localStorage.setItem("user", JSON.stringify(user));
+      // cookies().set("token", token, { expires: 7 });
+      // Use js-cookie to set the token cookie
+      Cookies.set("token", token, { expires: 1 });
+      Cookies.set("user", JSON.stringify(user), { expires: 7 });
       setUser(user);
       router.push(`/${user.role}/dashboard`);
     } catch (error) {
@@ -58,7 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );

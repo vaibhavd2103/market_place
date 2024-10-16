@@ -1,7 +1,12 @@
+"use client";
+
 import Cookies from "js-cookie";
 
 export function GetUser() {
-  const user = JSON.parse(String(window.localStorage.getItem("user")));
+  const user =
+    typeof window !== "undefined"
+      ? JSON.parse(String(window.localStorage.getItem("user")))
+      : JSON.parse(String(Cookies.get("user")));
   return user;
 }
 
