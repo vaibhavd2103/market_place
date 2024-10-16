@@ -1,5 +1,5 @@
-// import Image from "next/image";
 "use client";
+
 import API from "@/constants/APIs";
 import { useAuth } from "@/context/AuthContext";
 import { Order } from "@/types/order";

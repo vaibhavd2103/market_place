@@ -30,7 +30,7 @@ function Approver() {
       const axiosError = error as AxiosError; // type assertion here
       console.log(axiosError);
       if (axiosError.response?.status === 401) {
-        localStorage.removeItem("token");
+        window.localStorage.removeItem("token");
         router.push("/login");
       }
       alert(error);

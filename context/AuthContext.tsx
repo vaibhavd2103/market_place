@@ -1,12 +1,12 @@
 // context/AuthContext.tsx
 // "use server";
-import React, { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+import React, { createContext, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import instance from "@/utils/axios";
 import API from "@/constants/APIs";
 // import { cookies } from "next/headers";
 import Cookies from "js-cookie";
+import { AxiosError } from "axios";
 // import { useRouter } from "next/router";
 
 type User = {
@@ -29,63 +29,29 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  //   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (token) {
-  //     // fetch user info based on token
-  //     axios
-  //       .get("/api/auth/me", {
-  //         withCredentials: true,
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       })
-  //       .then((res) => setUser(res.data.user))
-  //       .catch(() => {
-  //         localStorage.removeItem("token");
-  //       });
-  //   }
-  // }, []);
-
-  //   useEffect(() => {
-  //     // Check if the user is authenticated on mount
-  //     const checkAuth = async () => {
-  //       try {
-  //         await axios.get('http://localhost:5000/api/buyer/products', {
-  //           withCredentials: true, // Important to send cookies with requests
-  //         });
-  //         setIsAuthenticated(true);
-  //       } catch (error) {
-  //         setIsAuthenticated(false);
-  //       } finally {
-  //         setLoading(false);
-  //       }
-  //     };
-
-  //     checkAuth();
-  //   }, []);
 
   const login = async (username: string, password: string) => {
     try {
       const res = await instance.post(API.LOGIN, { username, password });
       console.log(res.data);
       const { token, user } = res.data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      window.localStorage.setItem("token", token);
+      window.localStorage.setItem("user", JSON.stringify(user));
       // cookies().set("token", token, { expires: 7 });
       // Use js-cookie to set the token cookie
       Cookies.set("token", token, { expires: 1 });
       setUser(user);
       router.push(`/${user.role}/dashboard`);
     } catch (error) {
+      const axiosError = error as AxiosError;
       console.error("Failed to login", error);
-      alert(JSON.stringify(error.message));
+      alert(JSON.stringify(axiosError.message));
     }
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    window.localStorage.removeItem("token");
     Cookies.remove("token");
     setUser(null);
     router.push("/login");

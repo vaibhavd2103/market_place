@@ -2,6 +2,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
+interface JwtPayload {
+  user: {
+    role: string;
+    // other properties can be added here as needed
+  };
+}
+
 export async function middleware(req: NextRequest) {
   const tokenCookie = req.cookies.get("token");
   // console.log(tokenCookie);
@@ -13,15 +20,12 @@ export async function middleware(req: NextRequest) {
   }
 
   try {
-    // Verify the JWT token and extract user data
-    const { payload } = await jwtVerify(
+    const { payload } = (await jwtVerify(
       token,
       new TextEncoder().encode("vaibhav")
-    );
-    const userRole = payload.user.role; // Role is stored in the JWT payload
+    )) as { payload: JwtPayload };
+    const userRole = payload.user.role;
     const pathname = req.nextUrl.pathname;
-
-    // Define access rules for each role
     if (pathname.startsWith("/buyer") && userRole !== "buyer") {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
@@ -34,7 +38,6 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
   } catch (error) {
-    // If token verification fails, redirect to login
     alert(JSON.stringify(error));
     return NextResponse.redirect(new URL("/login", req.url));
   }

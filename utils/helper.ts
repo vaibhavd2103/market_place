@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 
 export function GetUser() {
-  const user = JSON.parse(String(localStorage.getItem("user")));
+  const user = JSON.parse(String(window.localStorage.getItem("user")));
   return user;
 }
 
